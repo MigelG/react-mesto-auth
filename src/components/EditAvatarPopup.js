@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PopupWithForm from './PopupWithForm';
 
 function EditProfilePopup({ isOpen, onClose, onPopupClick, onUpdateAvatar }) {
@@ -10,6 +10,13 @@ function EditProfilePopup({ isOpen, onClose, onPopupClick, onUpdateAvatar }) {
             avatar: avatarRef.current.value
         });
     }
+
+    //Очистка формы
+    useEffect(() => {
+        if (isOpen) {
+            avatarRef.current.value = '';
+        }
+    }, [isOpen])
 
     return (
         <PopupWithForm

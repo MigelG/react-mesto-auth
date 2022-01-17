@@ -10,7 +10,6 @@ function Card({ _id, name, link, likes, onCardClick, owner, onCardLike, onCardDe
         cardLikeButtonClassName = "place__like-button_active";
     }
 
-
     function handleClick() {
         onCardClick({ name, link, onCardClick });
     }

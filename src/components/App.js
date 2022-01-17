@@ -1,24 +1,58 @@
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
+import Login from './Login.js';
+import Register from './Register.js';
 import ImagePopup from './ImagePopup';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
+import InfoTooltip from './InfoTooltip';
 import { useState, useEffect } from "react";
 import api from "../utils/api";
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
-
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import * as auth from '../utils/auth.js';
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState('');
+  let navigate = useNavigate();
+
+  function handleLogin() {
+    setLoggedIn(true);
+  }
+
+  function handleQuit() {
+    localStorage.removeItem('token');
+    setLoggedIn(false);
+  }
+
+  //Переадресация пользователя
+  useEffect(() => {
+    loggedIn ? navigate('/react-mesto-auth') : navigate('/react-mesto-auth/sign-in');
+  }, [loggedIn]);
+
+  //Проверка токена и авторизация пользователя
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      auth.getContent(token)
+        .then((res) => {
+          if (res) {
+            setLoggedIn(true);
+            setCurrentEmail(res.data.email)
+          }
+        });
+    }
+  }, []);
 
   //Получение карточек при монтировании
   useEffect(() => {
     api.getCardList()
       .then(data => {
-        console.log(data);
         setCards(data);
       })
       .catch((res) => {
@@ -67,12 +101,14 @@ function App() {
     }
   }
 
-  //Состояния попапов
+  //Состояния попапов и тултипа
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isBigImagePopupOpen, setIsBigImagePopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [isInfoTooltipType, setIsInfoTooltipType] = useState(false);
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -91,11 +127,27 @@ function App() {
     setIsBigImagePopupOpen(true);
   }
 
+  function handleInfoTooltipOpen() {
+    setIsInfoTooltipOpen(true);
+  }
+
+  function handleInfoTooltipClose() {
+    setIsInfoTooltipOpen(false);
+    if (isInfoTooltipType) {
+      navigate('/react-mesto-auth/sign-in');
+    }
+  }
+
+  function handleInfoTooltipType(type) {
+    setIsInfoTooltipType(type);
+  }
+
   function closeAllPopups() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsBigImagePopupOpen(false);
+    setSelectedCard({});
   }
 
   //Обновление информации о пользователе
@@ -156,18 +208,36 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <div className="page__content">
-          <Header />
-          <Main
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            onImagePopup={handleCardClick}
-            cards={cards}
-            onCardLike={handleCardLike}
-            onCardDelete={handleCardDelete}
-            onCardClick={handleCardClick}
-          />
-          <Footer />
+          <Header email={currentEmail} handleQuit={handleQuit} />
+
+          <Routes>
+            <Route path="/react-mesto-auth" element={
+              <>
+                <Main
+                  onEditProfile={handleEditProfileClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onEditAvatar={handleEditAvatarClick}
+                  onImagePopup={handleCardClick}
+                  cards={cards}
+                  onCardLike={handleCardLike}
+                  onCardDelete={handleCardDelete}
+                  onCardClick={handleCardClick}
+                />
+                <Footer />
+              </>
+            } />
+            <Route path="/react-mesto-auth/sign-in"
+              element={<Login
+                handleLogin={handleLogin}
+                setCurrentEmail={setCurrentEmail}
+                handleInfoTooltipOpen={handleInfoTooltipOpen}
+                handleInfoTooltipType={handleInfoTooltipType} />} />
+            <Route path="/react-mesto-auth/sign-up"
+              element={<Register
+                setCurrentEmail={setCurrentEmail}
+                handleInfoTooltipOpen={handleInfoTooltipOpen}
+                handleInfoTooltipType={handleInfoTooltipType} />} />
+          </Routes>
 
           <EditProfilePopup
             isOpen={isEditProfilePopupOpen}
@@ -192,6 +262,11 @@ function App() {
             onClose={closeAllPopups}
             isOpen={isBigImagePopupOpen}
             onPopupClick={handlePopupClick} />
+
+          <InfoTooltip
+            isOpen={isInfoTooltipOpen}
+            onClose={handleInfoTooltipClose}
+            type={isInfoTooltipType} />
         </div>
       </div>
     </CurrentUserContext.Provider>

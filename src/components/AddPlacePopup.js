@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PopupWithForm from './PopupWithForm';
 
 function EditProfilePopup({ isOpen, onClose, onPopupClick, onAddPlace }) {
@@ -20,6 +20,14 @@ function EditProfilePopup({ isOpen, onClose, onPopupClick, onAddPlace }) {
             link
         });
     }
+
+    //Очистка формы
+    useEffect(() => {
+        if (isOpen) {
+            setName('');
+            setLink('');
+        }
+    }, [isOpen])
 
     return (
         <PopupWithForm
