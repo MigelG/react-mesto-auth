@@ -9,14 +9,9 @@ export const register = (email, password) => {
         },
         body: JSON.stringify({ email, password })
     })
-        .then((res) => {
-            if (res.status === 201) {
-                return res.json();
-            } else {
-                return Promise.reject(`Что-то пошло не так: ${res.status}`);
-            }
-        })
-        .catch(err => console.log(err));
+        .then(res => {
+            return checkResponse(res);
+        });
 };
 
 //Вход в систему
@@ -30,16 +25,12 @@ export const signin = (email, password) => {
         body: JSON.stringify({ email, password })
     })
         .then(res => {
-            if (res.ok) {
-                return res.json();
-            }
-            return Promise.reject(`Что-то пошло не так: ${res.status}`);
+            return checkResponse(res);
         })
         .then(data => {
             localStorage.setItem('token', data.token);
             return data;
-        })
-        .catch(err => console.log(err));
+        });
 }
 
 //Проверка токена
@@ -52,6 +43,12 @@ export const getContent = token => {
             'Authorization': `Bearer ${token}`
         }
     })
-        .then(res => res.json())
-        .catch(err => console.log(err));
+        .then(res => {
+            return checkResponse(res);
+        });
+}
+
+function checkResponse(res) {
+    if (res.ok) { return res.json() }
+    return Promise.reject(`Что-то пошло не так: ${res.status}`);
 }

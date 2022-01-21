@@ -1,7 +1,7 @@
-import * as auth from '../utils/auth.js';
 import { useState } from 'react';
+import AuthForm from './AuthForm.js';
 
-function Login({ handleLogin, setCurrentEmail, handleInfoTooltipOpen, handleInfoTooltipType }) {
+function Login({ onLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -18,31 +18,20 @@ function Login({ handleLogin, setCurrentEmail, handleInfoTooltipOpen, handleInfo
         if (!email || !password) {
             return;
         }
-        auth.signin(email, password)
-            .then((data) => {
-                if (data) {
-                    setCurrentEmail(email);
-                    setEmail('');
-                    setPassword('');
-                    handleLogin();
-                } else {
-                    handleInfoTooltipType(false);
-                    handleInfoTooltipOpen();
-                }
-            })
-            .catch(err => console.log(err));
+        onLogin(email, password, setEmail, setPassword);
     }
 
     return (
         <div className='register'>
             <h1 className='register__title'>Войти</h1>
-            <form name='login' className='register__form' onSubmit={handleSubmit} noValidate>
-                <input type='email' name='email' placeholder='E-mail'
-                    className='register__input' value={email} onChange={handleChangeEmail} required />
-                <input type='password' name='password' placeholder='Пароль'
-                    className='register__input' value={password} onChange={handleChangePassword} required />
-                <button type='submit' className='register__submit-button'>Войти</button>
-            </form>
+            <AuthForm
+                name='login'
+                handleSubmit={handleSubmit}
+                email={email}
+                handleChangeEmail={handleChangeEmail}
+                password={password}
+                handleChangePassword={handleChangePassword}
+                button='Войти' />
         </div>
     )
 }

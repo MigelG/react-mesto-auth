@@ -2,5 +2,12 @@
     font-size: 18px;
     font-weight: 500;
     line-height: 22px;
-    padding-right: 24px;
+    margin-bottom: 18px;
+}
+
+@media screen and (min-width: 622px) {
+    .header__email {
+        padding-right: 24px;
+        margin-bottom: 0;
+    }
 }

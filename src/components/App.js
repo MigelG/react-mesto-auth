@@ -1,8 +1,8 @@
-import Header from './Header.js';
-import Main from './Main.js';
-import Footer from './Footer.js';
-import Login from './Login.js';
-import Register from './Register.js';
+import Header from './Header';
+import Main from './Main';
+import Footer from './Footer';
+import Login from './Login';
+import Register from './Register';
 import ImagePopup from './ImagePopup';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
@@ -21,10 +21,6 @@ function App() {
   const [currentEmail, setCurrentEmail] = useState('');
   let navigate = useNavigate();
 
-  function handleLogin() {
-    setLoggedIn(true);
-  }
-
   function handleQuit() {
     localStorage.removeItem('token');
     setLoggedIn(false);
@@ -35,6 +31,38 @@ function App() {
     loggedIn ? navigate('/react-mesto-auth') : navigate('/react-mesto-auth/sign-in');
   }, [loggedIn]);
 
+  //Запрос на регистрацию
+  function onRegister(email, password) {
+    auth.register(email, password)
+      .then(res => {
+        if (res) {
+          handleInfoTooltipType(true);
+          handleInfoTooltipOpen();
+        } else {
+          handleInfoTooltipType(false);
+          handleInfoTooltipOpen();
+        }
+      })
+      .catch(err => console.log(err));
+  }
+
+  //Запрос на авторизацию
+  function onLogin(email, password, setEmail, setPassword) {
+    auth.signin(email, password)
+      .then((data) => {
+        if (data) {
+          setCurrentEmail(email);
+          setEmail('');
+          setPassword('');
+          setLoggedIn(true);
+        } else {
+          handleInfoTooltipType(false);
+          handleInfoTooltipOpen();
+        }
+      })
+      .catch(err => console.log(err));
+  }
+
   //Проверка токена и авторизация пользователя
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -43,9 +71,10 @@ function App() {
         .then((res) => {
           if (res) {
             setLoggedIn(true);
-            setCurrentEmail(res.data.email)
+            setCurrentEmail(res.data.email);
           }
-        });
+        })
+        .catch(err => console.log(err));
     }
   }, []);
 
@@ -196,22 +225,22 @@ function App() {
         }
       }
 
-      document.addEventListener("keydown", handleEsc)
+      document.addEventListener('keydown', handleEsc)
 
       return () => {
-        document.removeEventListener("keydown", handleEsc)
+        document.removeEventListener('keydown', handleEsc)
       }
     }
   }, [isEditProfilePopupOpen, isAddPlacePopupOpen, isEditAvatarPopupOpen, isBigImagePopupOpen])
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <div className="page">
-        <div className="page__content">
-          <Header email={currentEmail} handleQuit={handleQuit} />
+      <div className='page'>
+        <div className='page__content'>
+          <Header email={currentEmail} handleQuit={handleQuit} loggedIn={loggedIn} />
 
           <Routes>
-            <Route path="/react-mesto-auth" element={
+            <Route path='/react-mesto-auth' element={
               <>
                 <Main
                   onEditProfile={handleEditProfileClick}
@@ -226,17 +255,12 @@ function App() {
                 <Footer />
               </>
             } />
-            <Route path="/react-mesto-auth/sign-in"
-              element={<Login
-                handleLogin={handleLogin}
-                setCurrentEmail={setCurrentEmail}
-                handleInfoTooltipOpen={handleInfoTooltipOpen}
-                handleInfoTooltipType={handleInfoTooltipType} />} />
-            <Route path="/react-mesto-auth/sign-up"
-              element={<Register
-                setCurrentEmail={setCurrentEmail}
-                handleInfoTooltipOpen={handleInfoTooltipOpen}
-                handleInfoTooltipType={handleInfoTooltipType} />} />
+
+            <Route path='/react-mesto-auth/sign-in'
+              element={<Login onLogin={onLogin} />} />
+
+            <Route path='/react-mesto-auth/sign-up'
+              element={<Register onRegister={onRegister} />} />
           </Routes>
 
           <EditProfilePopup

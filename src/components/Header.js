@@ -1,23 +1,34 @@
 import logo from '../images/logo/logo.svg';
 import { Link, Route, Routes } from 'react-router-dom';
+import { useState } from 'react';
 
-function Header({ type, email, handleQuit }) {
+function Header({ email, handleQuit, loggedIn }) {
+
+    const [menu, setMenu] = useState(false);
+    function handleShowMenu() {
+        setMenu(!menu);
+    }
 
     return (
-        <header className="header">
-            <img src={logo} alt="Логотип" className="header__logo" />
+        <header className={`header ${menu && loggedIn ? 'header_active' : null}`}>
+            <img src={logo} alt='Логотип' className='header__logo' />
             <Routes>
                 <Route path='/react-mesto-auth' element={
-                    <div>
-                        <span className='header__email'>{email}</span>
-                        <Link className='header__link' to="/react-mesto-auth/sign-in" onClick={handleQuit}>Выйти</Link>
-                    </div>
+                    <>
+                        <button onClick={handleShowMenu} className={`header__menu-logo ${menu ? 'header__menu-logo_active' : null}`}>
+                            <span />
+                        </button>
+                        <div className={`header__info ${menu ? 'header__info_active' : null}`}>
+                            <span className='header__email'>{email}</span>
+                            <Link className='header__link' to='/react-mesto-auth/sign-in' onClick={handleQuit}>Выйти</Link>
+                        </div>
+                    </>
                 } />
                 <Route path='/react-mesto-auth/sign-in' element={
-                    <Link className='header__link' to="/react-mesto-auth/sign-up">Регистрация</Link>
+                    <Link className='header__link' to='/react-mesto-auth/sign-up'>Регистрация</Link>
                 } />
                 <Route path='/react-mesto-auth/sign-up' element={
-                    <Link className='header__link' to="/react-mesto-auth/sign-in">Войти</Link>
+                    <Link className='header__link' to='/react-mesto-auth/sign-in'>Войти</Link>
                 } />
             </Routes>
         </header>
