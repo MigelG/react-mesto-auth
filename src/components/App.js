@@ -35,32 +35,30 @@ function App() {
   function onRegister(email, password) {
     auth.register(email, password)
       .then(res => {
-        if (res) {
-          handleInfoTooltipType(true);
-          handleInfoTooltipOpen();
-        } else {
-          handleInfoTooltipType(false);
-          handleInfoTooltipOpen();
-        }
+        handleInfoTooltipType(true);
+        handleInfoTooltipOpen();
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        handleInfoTooltipType(false);
+        handleInfoTooltipOpen();
+        console.log(err);
+      });
   }
 
   //Запрос на авторизацию
   function onLogin(email, password, setEmail, setPassword) {
     auth.signin(email, password)
-      .then((data) => {
-        if (data) {
-          setCurrentEmail(email);
-          setEmail('');
-          setPassword('');
-          setLoggedIn(true);
-        } else {
-          handleInfoTooltipType(false);
-          handleInfoTooltipOpen();
-        }
+      .then(() => {
+        setCurrentEmail(email);
+        setEmail('');
+        setPassword('');
+        setLoggedIn(true);
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        handleInfoTooltipType(false);
+        handleInfoTooltipOpen();
+        console.log(err)
+      });
   }
 
   //Проверка токена и авторизация пользователя
